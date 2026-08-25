@@ -7,6 +7,7 @@
 ---
 
 ## Deliverables in this Directory
+- 📄 **Lab 1 Submission PDF**: [Lab1_PES1UG24CS395_G.pdf](Lab1_PES1UG24CS395_G.pdf) (Combined PDF containing Requirements Table, UML Use-Case Diagram, and Use-Case Flow Document)
 - 🗺️ **UML Use-Case Diagram**: [use_case_diagram.pdf](use_case_diagram.pdf) (Vector PDF with stick-figure actors)
 - 📊 **Requirements Table**: Detailed inline under [Section 1](#1-requirements-specification-table)
 - 📝 **Use-Case Flow Document**: Detailed inline under [Section 2](#2-use-case-flow-document-place-pallet-uc-02)

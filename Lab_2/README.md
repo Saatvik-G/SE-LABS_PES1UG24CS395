@@ -7,10 +7,11 @@
 ---
 
 ## Deliverables in this Directory
+- 📄 **Lab 2 Submission PDF**: [Lab2_PES1UG24CS395_G.pdf](Lab2_PES1UG24CS395_G.pdf) (Combined PDF containing Backlog, Active Sprint Board, Burndown Chart, and Reflections)
 - 📋 **README.md** (This document containing the backlog table, active board details, and reflections)
-- 🗺️ **Jira Backlog Mockup** (Visual representation of the product backlog)
-- 📊 **Sprint Board Mockup** (Active board view showing tasks mid-sprint)
-- 📉 **Burndown Chart** (Sprint burndown tracking ideal vs actual points)
+- 🗺️ **Jira Backlog Mockup**: [jira_backlog.png](jira_backlog.png)
+- 📊 **Sprint Board Mockup**: [sprint_board.png](sprint_board.png)
+- 📉 **Burndown Chart**: [burndown_chart.png](burndown_chart.png)
 
 ---
 
