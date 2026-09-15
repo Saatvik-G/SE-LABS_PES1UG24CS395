@@ -12,5 +12,5 @@ For each laboratory session, a separate directory is created containing the resp
     *   **Problem Statement:** Warehouse Inventory & Pallet Location Tracker
     *   **Deliverables:** Product Backlog (Epics & Stories), Active Sprint Board Mockup, Burndown Chart, and Reflections.
 *   **[Lab 3: Component Modelling & Architectural Pattern Selection](./Lab_3/)**
-    *   **Scenario:** Self-Service Coffee Kiosk System
+    *   **Problem Statement:** Warehouse Inventory & Pallet Location Tracker (Problem Statement #27)
     *   **Deliverables:** 3-Tier Layered Architecture Selection, Exactly 5 UML Components, Exactly 4 Ball-and-Socket Interfaces, 1-Page Written Architectural Justification, and Comparative Trade-Off Analysis.
