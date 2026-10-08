@@ -14,3 +14,6 @@ For each laboratory session, a separate directory is created containing the resp
 *   **[Lab 3: Component Modelling & Architectural Pattern Selection](./Lab_3/)**
     *   **Problem Statement:** Warehouse Inventory & Pallet Location Tracker (Problem Statement #27)
     *   **Deliverables:** 3-Tier Layered Architecture Selection, Exactly 5 UML Components, Exactly 4 Ball-and-Socket Interfaces, 1-Page Written Architectural Justification, and Comparative Trade-Off Analysis.
+*   **[Lab 4: VibeCoding — Zombie Escape](./Lab-4/)**
+    *   **Game Repo:** [SETAPESU26/25_zombie_escape](https://github.com/SETAPESU26/25_zombie_escape.git)
+    *   **Deliverables:** Updated Game Code with Tasks 1–4, 10s Gameplay Videos (Before & After), and Prompt Engineering Chat History (PDF/DOCX/MD).

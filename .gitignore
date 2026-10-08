@@ -1,2 +1,5 @@
 *.pdf
 user_screenshots/
+
+__pycache__/
+*.pyc
