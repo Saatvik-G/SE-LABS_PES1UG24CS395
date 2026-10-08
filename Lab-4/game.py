@@ -58,10 +58,20 @@ class Player:
         self.color = (60,160,220)
         self.bullets = []
         self.shoot_cooldown = 0
-        # Task 1: 3 HP and invincibility window
+        # Task 1: Health & Invincibility
         self.max_hp = 3
         self.hp = 3
-        self.invincible_timer = 0  # frames remaining of invincibility
+        self.invincible_timer = 0
+        # Task 2: Ammo & 2-second Reload System
+        self.max_ammo = 12
+        self.ammo = 12
+        self.reloading = False
+        self.reload_timer = 0  # 120 frames = 2 seconds at 60 FPS
+
+    def start_reload(self):
+        if not self.reloading and self.ammo < self.max_ammo:
+            self.reloading = True
+            self.reload_timer = 2 * FPS
 
     def move(self, keys, width, height):
         dx = dy = 0
@@ -75,9 +85,22 @@ class Player:
             self.shoot_cooldown -= 1
         if self.invincible_timer > 0:
             self.invincible_timer -= 1
+        # Task 2: Reload timer countdown
+        if self.reloading:
+            self.reload_timer -= 1
+            if self.reload_timer <= 0:
+                self.ammo = self.max_ammo
+                self.reloading = False
+                self.reload_timer = 0
 
     def shoot(self, target_pos):
         if self.shoot_cooldown > 0: return
+        # Task 2: Block shooting when empty or reloading
+        if self.reloading: return
+        if self.ammo <= 0:
+            self.start_reload()
+            return
+
         cx, cy = self.rect.center
         tx, ty = target_pos
         dx, dy = tx-cx, ty-cy
@@ -86,6 +109,9 @@ class Player:
         vx, vy = dx/dist*10, dy/dist*10
         self.bullets.append([cx-4, cy-4, vx, vy])
         self.shoot_cooldown = 15
+        self.ammo -= 1
+        if self.ammo <= 0:
+            self.start_reload()
 
     def update_bullets(self, width, height):
         live = []
@@ -96,7 +122,7 @@ class Player:
         self.bullets = live
 
     def draw(self, screen):
-        # Visual flicker effect during invincibility window
+        # Task 1: Blink effect during invincibility
         if self.invincible_timer > 0 and (self.invincible_timer // 6) % 2 == 1:
             pygame.draw.rect(screen, (150, 220, 255), self.rect, width=2, border_radius=6)
         else:
@@ -111,7 +137,7 @@ class GameEngine:
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption("Zombie Escape")
         self.clock = pygame.time.Clock()
-        self.font = pygame.font.SysFont("monospace", 19)
+        self.font = pygame.font.SysFont("monospace", 17)
         self.big_font = pygame.font.SysFont("monospace", 44, bold=True)
         self.reset()
 
@@ -128,7 +154,13 @@ class GameEngine:
     def handle_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT: return False
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_r: self.reset()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r:
+                    if self.game_over:
+                        self.reset()
+                    else:
+                        # Task 2: Manual reload on 'R' key when alive
+                        self.player.start_reload()
             if event.type == pygame.MOUSEBUTTONDOWN and not self.game_over:
                 self.player.shoot(event.pos)
         return True
@@ -143,7 +175,7 @@ class GameEngine:
         for z in self.zombies:
             z.update(self.player.rect.center)
             if z.rect.colliderect(self.player.rect):
-                # Task 1: 1 HP deduction on touch with 1.5s (90 frames) invincibility window
+                # Task 1: 1 HP deduction on touch with 1.5s invincibility
                 if self.player.invincible_timer == 0:
                     self.player.hp -= 1
                     self.player.invincible_timer = 90
@@ -182,17 +214,25 @@ class GameEngine:
         self.player.draw(self.screen)
         hud_bg = pygame.Rect(0, 0, WIDTH, 40)
         pygame.draw.rect(self.screen, (15,20,15), hud_bg)
-        # Task 1: Show HP in HUD
+
+        # Task 2: Ammo & Reload HUD display
+        if self.player.reloading:
+            sec_left = max(0.1, self.player.reload_timer / FPS)
+            ammo_str = f"RELOAD ({sec_left:.1f}s)"
+        else:
+            ammo_str = f"{self.player.ammo}/{self.player.max_ammo}"
+
         hud = self.font.render(
-            f"Wave: {self.wave}  Score: {self.score}  Kills: {self.kills}/{self.kills_to_next}  HP: {self.player.hp}/{self.player.max_hp}  |  WASD Move, Click Shoot, R Restart",
+            f"Wave: {self.wave}  Score: {self.score}  Kills: {self.kills}/{self.kills_to_next}  HP: {self.player.hp}/{self.player.max_hp}  Ammo: {ammo_str}  [R: Reload]",
             True, (160,220,120))
-        self.screen.blit(hud, (8, 8))
+        self.screen.blit(hud, (8, 9))
+
         if self.game_over:
             ov = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
             ov.fill((0,0,0,160))
             self.screen.blit(ov, (0,0))
             m = self.big_font.render("DEVOURED!", True, (180,40,40))
-            s = self.font.render(f"Wave {self.wave} | Score {self.score} | Press R", True, (200,200,200))
+            s = self.font.render(f"Wave {self.wave} | Score {self.score} | Press R to Restart", True, (200,200,200))
             self.screen.blit(m, (WIDTH//2-m.get_width()//2, HEIGHT//2-40))
             self.screen.blit(s, (WIDTH//2-s.get_width()//2, HEIGHT//2+20))
         pygame.display.flip()
