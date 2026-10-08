@@ -49,6 +49,51 @@ def spawn_zombie(width, height, player_rect, margin=120):
             return Zombie(x, y)
 
 
+# Task 3: Explosive Barrel and Explosion classes
+class Barrel:
+    RADIUS = 16
+    BLAST_RADIUS = 120
+
+    def __init__(self, x, y):
+        self.rect = pygame.Rect(x - self.RADIUS, y - self.RADIUS, self.RADIUS * 2, self.RADIUS * 2)
+        self.color = (210, 75, 20)
+
+    def draw(self, screen):
+        # Draw barrel with metal drum ridges and yellow hazard indicator
+        pygame.draw.rect(screen, self.color, self.rect, border_radius=6)
+        pygame.draw.rect(screen, (245, 185, 30), self.rect, width=2, border_radius=6)
+        cx, cy = self.rect.center
+        pygame.draw.line(screen, (30, 25, 20), (cx - 10, cy), (cx + 10, cy), 3)
+        pygame.draw.circle(screen, (255, 235, 80), (cx, cy), 4)
+
+
+class Explosion:
+    def __init__(self, x, y, max_radius=120, duration=18):
+        self.x = x
+        self.y = y
+        self.max_radius = max_radius
+        self.duration = duration
+        self.frame = 0
+
+    def update(self):
+        self.frame += 1
+        return self.frame >= self.duration
+
+    def draw(self, screen):
+        progress = self.frame / self.duration
+        current_r = max(4, int(self.max_radius * math.sin(progress * math.pi / 2)))
+        alpha = int(255 * (1 - progress))
+        surf = pygame.Surface((self.max_radius * 2 + 20, self.max_radius * 2 + 20), pygame.SRCALPHA)
+        center = (self.max_radius + 10, self.max_radius + 10)
+        # Outer shockwave ring
+        ring_width = max(2, int(6 * (1 - progress)))
+        pygame.draw.circle(surf, (255, 110, 20, max(0, min(255, alpha))), center, current_r, width=ring_width)
+        # Inner flash
+        inner_r = max(2, int(current_r * 0.65))
+        pygame.draw.circle(surf, (255, 220, 50, max(0, min(255, int(alpha * 0.75)))), center, inner_r)
+        screen.blit(surf, (self.x - self.max_radius - 10, self.y - self.max_radius - 10))
+
+
 SPEED = 4
 
 
@@ -66,7 +111,7 @@ class Player:
         self.max_ammo = 12
         self.ammo = 12
         self.reloading = False
-        self.reload_timer = 0  # 120 frames = 2 seconds at 60 FPS
+        self.reload_timer = 0
 
     def start_reload(self):
         if not self.reloading and self.ammo < self.max_ammo:
@@ -85,7 +130,6 @@ class Player:
             self.shoot_cooldown -= 1
         if self.invincible_timer > 0:
             self.invincible_timer -= 1
-        # Task 2: Reload timer countdown
         if self.reloading:
             self.reload_timer -= 1
             if self.reload_timer <= 0:
@@ -95,7 +139,6 @@ class Player:
 
     def shoot(self, target_pos):
         if self.shoot_cooldown > 0: return
-        # Task 2: Block shooting when empty or reloading
         if self.reloading: return
         if self.ammo <= 0:
             self.start_reload()
@@ -122,7 +165,6 @@ class Player:
         self.bullets = live
 
     def draw(self, screen):
-        # Task 1: Blink effect during invincibility
         if self.invincible_timer > 0 and (self.invincible_timer // 6) % 2 == 1:
             pygame.draw.rect(screen, (150, 220, 255), self.rect, width=2, border_radius=6)
         else:
@@ -144,6 +186,14 @@ class GameEngine:
     def reset(self):
         self.player = Player(WIDTH//2, HEIGHT//2)
         self.zombies = [spawn_zombie(WIDTH, HEIGHT, self.player.rect) for _ in range(4)]
+        # Task 3: 4 Barrels placed on map
+        self.barrels = [
+            Barrel(160, 140),
+            Barrel(640, 140),
+            Barrel(160, 420),
+            Barrel(640, 420)
+        ]
+        self.explosions = []
         self.score = 0
         self.wave = 1
         self.kills = 0
@@ -159,7 +209,6 @@ class GameEngine:
                     if self.game_over:
                         self.reset()
                     else:
-                        # Task 2: Manual reload on 'R' key when alive
                         self.player.start_reload()
             if event.type == pygame.MOUSEBUTTONDOWN and not self.game_over:
                 self.player.shoot(event.pos)
@@ -172,16 +221,42 @@ class GameEngine:
         self.player.update_bullets(WIDTH, HEIGHT)
         self.score = int(time.time() - self.start_time)
 
+        # Update explosions
+        self.explosions = [exp for exp in self.explosions if not exp.update()]
+
         for z in self.zombies:
             z.update(self.player.rect.center)
             if z.rect.colliderect(self.player.rect):
-                # Task 1: 1 HP deduction on touch with 1.5s invincibility
                 if self.player.invincible_timer == 0:
                     self.player.hp -= 1
                     self.player.invincible_timer = 90
                     if self.player.hp <= 0:
                         self.game_over = True
 
+        # Task 3: Bullet collision with explosive barrels
+        for barrel in self.barrels[:]:
+            barrel_hit = False
+            for b in self.player.bullets[:]:
+                bx, by = int(b[0]), int(b[1])
+                if barrel.rect.collidepoint(bx, by):
+                    barrel_hit = True
+                    if b in self.player.bullets:
+                        self.player.bullets.remove(b)
+                    break
+            if barrel_hit:
+                self.barrels.remove(barrel)
+                bx, by = barrel.rect.center
+                self.explosions.append(Explosion(bx, by, max_radius=barrel.BLAST_RADIUS))
+                # Destroy all zombies within blast radius
+                for z in self.zombies[:]:
+                    zx, zy = z.rect.center
+                    dist = ((zx - bx) ** 2 + (zy - by) ** 2) ** 0.5
+                    if dist <= barrel.BLAST_RADIUS:
+                        self.zombies.remove(z)
+                        self.kills += 1
+                        self.score += 15
+
+        # Bullet collision with zombies
         dead = []
         for z in self.zombies:
             for b in self.player.bullets[:]:
@@ -210,12 +285,17 @@ class GameEngine:
             pygame.draw.line(self.screen, (40,45,35), (x,0), (x,HEIGHT), 1)
         for y in range(0, HEIGHT, 60):
             pygame.draw.line(self.screen, (40,45,35), (0,y), (WIDTH,y), 1)
+
+        # Task 3: Draw barrels & explosions
+        for barrel in self.barrels: barrel.draw(self.screen)
+        for exp in self.explosions: exp.draw(self.screen)
+
         for z in self.zombies: z.draw(self.screen)
         self.player.draw(self.screen)
+
         hud_bg = pygame.Rect(0, 0, WIDTH, 40)
         pygame.draw.rect(self.screen, (15,20,15), hud_bg)
 
-        # Task 2: Ammo & Reload HUD display
         if self.player.reloading:
             sec_left = max(0.1, self.player.reload_timer / FPS)
             ammo_str = f"RELOAD ({sec_left:.1f}s)"
