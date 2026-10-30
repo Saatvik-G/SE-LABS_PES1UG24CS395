@@ -17,3 +17,6 @@ For each laboratory session, a separate directory is created containing the resp
 *   **[Lab 4: VibeCoding — Zombie Escape](./Lab-4/)**
     *   **Game Repo:** [SETAPESU26/25_zombie_escape](https://github.com/SETAPESU26/25_zombie_escape.git)
     *   **Deliverables:** Updated Game Code with Tasks 1–4, 10s Gameplay Videos (Before & After), and Prompt Engineering Chat History (PDF/DOCX/MD).
+*   **[Lab 5: Static Code Analysis — Event Manager](./Lab-5/)**
+    *   **Assigned Repo:** [SETAPESU26/L5_31_event_manager](https://github.com/SETAPESU26/L5_31_event_manager.git)
+    *   **Deliverables:** Final Corrected Python Code, 3 Separate Tool Commits (Pylint 10.00/10, Bandit 0 issues, Flake8 clean), Consolidated PDF Report, and Before/After Output Logs.

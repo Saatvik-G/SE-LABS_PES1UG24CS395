@@ -1,0 +1,20 @@
+# Issue Identification Table — Lab 5: Static Code Analysis
+
+**Student Name:** Saatvik Gupta  
+**SRN:** PES1UG24CS395  
+**Section:** G  
+**Target Repository:** `L5_31_event_manager`  
+**File Analyzed:** `event_manager.py`  
+
+---
+
+| Issue | Tool | Severity / Type | Line(s) | Description | Fix Approach |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Command Injection via Shell Execution** | Bandit (`B605`) | **High** / Security Vulnerability | Line 56 | `os.system("lp badges_" + eventName + ".txt")` executes shell commands using string concatenation of untrusted input (`eventName`), enabling command injection. | Removed `os.system` and shell invocation entirely. Replaced with safe file writing of badges directly in Python (`with open(...)`), eliminating external shell execution vulnerabilities. |
+| **Insecure Deserialization via Pickle** | Bandit (`B301`, `B403`) | **Medium** / Security Vulnerability | Lines 2, 46, 51 | Python's `pickle` module allows arbitrary code execution during deserialization if an attacker alters `events.pkl`. | Replaced `pickle.dump` / `pickle.load` with standard `json.dump` / `json.load` using UTF-8 encoding. JSON only serializes primitive data structures and cannot execute arbitrary code. |
+| **Cryptographically Insecure PRNG** | Bandit (`B311`) | **Low** / Security Practice | Lines 3, 72 | `random.choice()` uses the Mersenne Twister pseudo-random generator, which is predictable and unsuitable for security-sensitive selections or fair draws. | Replaced `random.choice` with `secrets.choice` from Python's standard `secrets` module, providing cryptographically strong pseudo-random number generation. |
+| **Dangerous Mutable Default Argument** | Pylint (`W0102`) | **Medium** / Bug (Code Defect) | Line 9 | `def createEvent(..., guests=[]):` uses a mutable list as default argument. In Python, default arguments are evaluated once at function definition time, causing all events created without an explicit list to share the exact same list instance in memory. This caused "Alumni Dinner" to inherit "Tech Meetup" guests and falsely report full capacity. | Changed default parameter to `guests=None`, and inside the function initialized `if guests is None: guests = []`. Each event now receives an independent list instance. |
+| **Unused Function Argument** | Pylint (`W0613`) | **Low** / Code Quality | Line 39 | `sortOrder` parameter in `guestReport(eventName, sortOrder)` was accepted but never referenced or utilized in the function body. | Leveraged `sortOrder` in `guest_report(event_name, sort_order="name")` to control sorting direction (`reverse=(sort_order == "desc")`), making the parameter functional. |
+| **Non-Standard Naming Conventions** | Pylint (`C0103`) | **Low** / Convention | Lines 9, 15, 27, 32, 39, 44, 49, 54 | Function and argument names used `camelCase` (e.g., `createEvent`, `eventName`, `seatsLeft`) instead of PEP 8 compliant `snake_case`. | Renamed all functions and parameters to PEP 8 standard `snake_case` (e.g., `create_event`, `event_name`, `seats_left`, `event_status`, etc.). |
+| **Missing Module and Function Docstrings** | Pylint (`C0114`, `C0116`) | **Low** / Convention | Lines 1, 9, 15, 27, 32, 39, 44, 49, 54, 59 | Entire module and all public function definitions lacked documentation strings explaining their purpose, parameters, and return types. | Added comprehensive PEP 257 docstrings for the module and all functions describing behavior, inputs, and outputs. |
+| **PEP 8 Formatting & Whitespace Violations** | Flake8 (`E225`, `E231`, `E261`, `E305`, `E501`) | **Low** / Style & Formatting | Lines 61, 66, 75, 79 | Violations included missing whitespace after commas (`"Rooftop",2`), missing spaces around assignment operators (`left=seatsLeft`), insufficient spaces before inline comments, missing 2 blank lines before top-level code, and lines exceeding 79 characters. | Fixed all whitespace, comma spacing, operator padding, inline comment spacing, line wrapping, and encapsulated top-level execution under `if __name__ == "__main__":`. |

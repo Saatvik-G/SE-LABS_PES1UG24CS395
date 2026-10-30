@@ -1,0 +1,17 @@
+{
+  "Tech Meetup": {
+    "venue": "Hall A",
+    "capacity": 3,
+    "guests": [
+      "Asha",
+      "Ravi"
+    ]
+  },
+  "Alumni Dinner": {
+    "venue": "Rooftop",
+    "capacity": 2,
+    "guests": [
+      "Meena"
+    ]
+  }
+}

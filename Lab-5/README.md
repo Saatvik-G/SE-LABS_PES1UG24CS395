@@ -1,55 +1,72 @@
 # Lab 5: Static Code Analysis — Event Management System
 
-**Your file:** `event_manager.py`
+**Student Name:** Saatvik Gupta  
+**SRN:** PES1UG24CS395  
+**Section:** G  
+**Course:** Software Engineering Laboratory  
+**Assigned Original Repository:** [SETAPESU26/L5_31_event_manager](https://github.com/SETAPESU26/L5_31_event_manager.git)  
+**Personal Lab Repository:** [Saatvik-G/SE-LABS_PES1UG24CS395](https://github.com/Saatvik-G/SE-LABS_PES1UG24CS395.git)  
 
-Follow the lab handout for the full instructions.
+---
 
-## About the program
+## Deliverables & Submission Assets
 
-A booking desk for small events. It creates events with a venue and capacity, registers guests until an event is full, reports seats left, picks a lucky-draw winner, labels events as upcoming or completed, and saves everything to events.pkl.
+| Deliverable | Description | File Link |
+| :--- | :--- | :--- |
+| **Final Corrected Code** | Cleaned and validated Python script meeting 10.00/10 Pylint score, 0 Bandit vulnerabilities, and 0 Flake8 issues | [`event_manager.py`](event_manager.py) |
+| **Consolidated Lab Report (PDF)** | Formatted report containing Introduction, Issue Table, Screenshots, Report Contents, and Reflection Answers | [`Lab5_PES1UG24CS395_G.pdf`](Lab5_PES1UG24CS395_G.pdf) |
+| **Issue Documentation (Markdown)** | Detailed analysis table of all 8 identified issues and remediation approaches | [`issues.md`](issues.md) |
+| **Reflection Answers (Markdown)** | Comprehensive answers to all 4 static analysis reflection questions | [`reflection.md`](reflection.md) |
+| **Analysis Reports (Before & After)** | Text logs for Pylint, Bandit, and Flake8 executions | [`pylint_report_before.txt`](pylint_report_before.txt), [`pylint_report_after.txt`](pylint_report_after.txt), [`bandit_report_before.txt`](bandit_report_before.txt), [`bandit_report_after.txt`](bandit_report_after.txt), [`flake8_report_before.txt`](flake8_report_before.txt), [`flake8_report_after.txt`](flake8_report_after.txt) |
 
-The code works, but only just. It has quality, style and security problems of the kind Pylint, Flake8 and Bandit are built to find.
+---
 
-## What to do
+## Static Code Analysis Summary
 
-1. **Run it first** and read the output carefully:
+### Tool Roles & Metrics
 
-   ```
-   python event_manager.py
-   ```
+| Static Analysis Tool | Role | Before Fixes | After Fixes | Status |
+| :--- | :--- | :---: | :---: | :---: |
+| **Pylint** | Code quality, design smells, naming conventions, docstrings | **4.64 / 10** | **10.00 / 10** | **100% Resolved** (Target > 9.5 exceeded) |
+| **Bandit** | Python security vulnerability scanner (CWE mapping) | **4 Issues** (1 High, 1 Medium, 2 Low) | **0 Issues** (No issues identified) | **100% Clean** |
+| **Flake8** | PEP 8 style, layout, operator padding, line length | **4 Violations** | **0 Violations** (Clean exit code 0) | **100% Clean** |
 
-   It runs a short demonstration and needs no input. Not every problem in this file is something a tool will flag, so pay attention to output that looks wrong. Two events are created separately, so think about whether the seat counts and "full" messages make sense.
+---
 
-2. **Install the tools:**
+## 3 Separate Git Commits for Tool Fixes
 
-   ```
-   python -m pip install pylint bandit flake8
-   ```
+Per lab instructions, all changes were committed in distinct, focused commits:
 
-3. **Run the analysis and save the reports:**
+1. **Commit 1 (Bandit Fixes):**  
+   `fix(bandit): replace insecure pickle and shell command with json and safe file writing`  
+   - Replaced `os.system` command injection vulnerability (`B605`) with safe in-process badge file generation.
+   - Replaced insecure object deserialization with `pickle` (`B301`, `B403`) by adopting structured `json.dump` / `json.load`.
+   - Replaced weak PRNG `random.choice` (`B311`) with cryptographically secure `secrets.choice`.
 
-   ```
-   python -m pylint event_manager.py > pylint_report.txt
-   python -m bandit -r event_manager.py > bandit_report.txt
-   python -m flake8 event_manager.py > flake8_report.txt
-   ```
+2. **Commit 2 (Pylint Fixes):**  
+   `fix(pylint): resolve mutable default argument, docstrings, unused argument and naming conventions`  
+   - Fixed mutable default argument bug `guests=[]` (`W0102`) by adopting `guests=None` and local instantiation, resolving cross-event data corruption.
+   - Converted all function and parameter identifiers from `camelCase` to PEP 8 standard `snake_case` (`C0103`).
+   - Added descriptive PEP 257 docstrings for module and all public functions (`C0114`, `C0116`).
+   - Leveraged previously unused argument `sortOrder` in `guest_report()` (`W0613`).
+   - Raised Pylint score to **10.00 / 10**.
 
-4. **Document the issues** in `issues.md` using this table (at least 4 rows, high and medium severity first):
+3. **Commit 3 (Flake8 Fixes):**  
+   `style(flake8): fix PEP 8 formatting whitespace line lengths and entry point`  
+   - Corrected missing whitespace after commas (`E231`), missing whitespace around operators (`E225`), and inline comment spacing (`E261`).
+   - Wrapped long lines under 79 characters (`E501`).
+   - Added two blank lines before top-level definitions and encapsulated program execution under `if __name__ == "__main__":` (`E305`).
 
-   | Issue | Type | Line(s) | Description | Fix Approach |
-   |-------|------|---------|-------------|--------------|
-   | ...   | ...  | ...     | ...         | ...          |
+---
 
-5. **Fix the code.** Fix at least 4 of the issues you documented, then rerun all three tools to confirm they are gone. Repeat until you are satisfied. The program should still do its job when you are done.
+## How to Run & Verify
 
-6. **Reflect.** Answer the four reflection questions from the handout in `reflection.md`.
+```bash
+# 1. Run the corrected program
+python event_manager.py
 
-## Deliverables
-
-- `event_manager.py`: your cleaned version, with at least 4 issues fixed.
-- `issues.md`: the completed issue table.
-- `reflection.md`: your answers to the reflection questions.
-
-**Target:** aim for a Pylint score above 9.5 on your final file. A perfect 10.00/10 is very good.
-
-Be ready to explain the bugs you found and how you fixed them. You may be called on to present.
+# 2. Run static analysis tools
+python -m pylint event_manager.py
+python -m bandit -r event_manager.py
+python -m flake8 event_manager.py
+```
