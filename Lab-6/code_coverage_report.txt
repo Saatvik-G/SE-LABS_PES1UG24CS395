@@ -1,0 +1,6 @@
+Name                                   Stmts   Miss  Cover   Missing
+--------------------------------------------------------------------
+CodeCoverageTest_coupon_validator.py      37      0   100%
+coupon_validator.py                       32      0   100%
+--------------------------------------------------------------------
+TOTAL                                     69      0   100%
